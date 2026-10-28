@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Metric Reality Gap</title>
+  <meta name="description" content="Live gap between Metric DEX pool prices and real-world reference prices, in basis points.">
+  <meta property="og:title" content="Metric Reality Gap — live">
+  <meta property="og:description" content="Does Metric really price everything to reality? Live pool vs. CEX / stock-market gap, stale-price detection and alerts.">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2310b981'/%3E%3Cpath d='M6 20l6-6 5 4 9-9' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"></span>
+      <div>
+        <h1 id="title">Metric Reality Gap</h1>
+        <p class="sub">Metric pool price vs. the real world, live in basis points</p>
+      </div>
+    </div>
+    <div class="actions">
+      <span class="live" id="live"><i></i><span>connecting</span></span>
+      <button id="notify" class="btn" type="button" title="Browser alerts when a gap crosses your threshold">🔔 Alerts off</button>
+      <button id="share" class="btn primary" type="button">Share on X</button>
+    </div>
+  </header>
+
+  <div id="demo" class="banner" hidden>Demo mode: prices are <b>simulated</b> so you can see every state. Point the monitor at real Metric pools in <code>config.json</code>.</div>
+
+  <main>
+    <section class="stats" aria-label="Summary">
+      <div class="stat"><span class="k">Pools</span><span class="v" id="s-pools">—</span></div>
+      <div class="stat"><span class="k">Widest gap now</span><span class="v" id="s-max">—</span><span class="h" id="s-max-pool"></span></div>
+      <div class="stat"><span class="k">Median |gap|</span><span class="v" id="s-med">—</span></div>
+      <div class="stat"><span class="k">Alerts / stale</span><span class="v" id="s-alert">—</span></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Pools</h2>
+        <span class="hint">Gap = (Metric − reference) / reference. Click a row for charts. “My alert” is saved only in your browser.</span>
+      </div>
+      <div class="table-wrap">
+        <table id="pools">
+          <thead>
+            <tr>
+              <th>Pool</th><th class="num opt">Metric</th><th class="num opt">Reality</th><th class="num">Gap</th>
+              <th class="num opt">Edge after fee</th><th>Status</th><th class="spark-col opt">Last 5 min</th><th class="num">My alert (bps)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="detail">
+      <div class="card-head">
+        <h2 id="d-title">—</h2>
+        <div class="tabs" role="tablist" id="ranges">
+          <button data-m="15">15m</button><button data-m="60" class="on">1h</button><button data-m="360">6h</button><button data-m="1440">24h</button>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div>
+          <h3>Gap (bps) <span class="legend"><i class="sw gap"></i>gap <i class="sw band"></i>± alert threshold</span></h3>
+          <div class="chart"><canvas id="c-gap"></canvas></div>
+          <h3>Price <span class="legend"><i class="sw pool"></i>Metric <i class="sw ref"></i>reference</span></h3>
+          <div class="chart short"><canvas id="c-price"></canvas></div>
+        </div>
+        <aside class="facts" id="d-facts"></aside>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Alert feed</h2><span class="hint">Server-wide, at each pool's default threshold</span></div>
+      <ol id="alerts" class="alerts"></ol>
+    </section>
+  </main>
+
+  <footer>
+    <span>Not financial advice. Gaps are before gas and slippage. Reference prices may be USDT-quoted.</span>
+    <span id="links"></span>
+  </footer>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>

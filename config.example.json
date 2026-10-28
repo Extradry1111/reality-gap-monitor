@@ -1,0 +1,132 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8787,
+    "title": "Metric Reality Gap",
+    "publicUrl": "${PUBLIC_URL}",
+    "xHandle": "",
+    "links": {
+      "GitHub": "https://github.com/Extradry1111/reality-gap-monitor",
+      "Metric": "https://app.metric.xyz/"
+    }
+  },
+
+  "engine": {
+    "tickMs": 1000,
+    "sampleMs": 2000,
+    "maxRefAgeMs": 15000,
+    "maxPoolAgeMs": 30000,
+    "retentionHours": 24
+  },
+
+  "alerts": {
+    "defaultThresholdBps": 30,
+    "confirmSec": 3,
+    "hysteresis": 0.8,
+    "renotifyFactor": 2,
+    "staleAfterSec": 60,
+    "staleRefMoveBps": 15,
+    "feedDownSec": 30,
+    "alertWhenMarketClosed": false,
+    "telegram": {
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "chatId": "${TELEGRAM_CHAT_ID}",
+      "events": ["gap_open", "gap_widen", "stale_open", "feed_down"]
+    },
+    "webhooks": [
+      { "url": "${DISCORD_WEBHOOK_URL}", "format": "discord", "events": ["gap_open", "gap_widen", "stale_open"] }
+    ]
+  },
+
+  "references": {
+    "binance": { "wsBase": "wss://stream.binance.com:9443" },
+    "coinbase": { "wsUrl": "wss://ws-feed.exchange.coinbase.com" },
+    "finnhub": { "token": "${FINNHUB_TOKEN}" },
+    "yahoo": { "pollMs": 15000 }
+  },
+
+  "chains": {
+    "ethereum": { "rpc": "${ETH_RPC_URL}", "chainId": 1 },
+    "bnb": { "rpc": "${BNB_RPC_URL}", "chainId": 56 },
+    "robinhood": { "rpc": "${ROBINHOOD_RPC_URL}", "chainId": "${ROBINHOOD_CHAIN_ID}" }
+  },
+
+  "pools": [
+    {
+      "id": "eth-usdc-ethereum",
+      "label": "ETH / USDC",
+      "chain": "ethereum",
+      "kind": "crypto",
+      "feeBps": 5,
+      "thresholdBps": 25,
+      "pool": {
+        "type": "evm-call",
+        "address": "0xPASTE_METRIC_POOL_ADDRESS",
+        "abi": "function getPrice() view returns (uint256)",
+        "method": "getPrice",
+        "args": [],
+        "decimals": 18,
+        "pollMs": 3000
+      },
+      "reference": {
+        "combine": "median",
+        "sources": [
+          { "type": "binance", "symbol": "ETHUSDC" },
+          { "type": "coinbase", "symbol": "ETH-USD" },
+          {
+            "type": "evm-call",
+            "label": "Chainlink ETH/USD",
+            "address": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",
+            "abi": "function latestRoundData() view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)",
+            "method": "latestRoundData",
+            "resultKey": "answer",
+            "decimals": 8,
+            "pollMs": 10000
+          }
+        ]
+      }
+    },
+    {
+      "id": "bnb-usdt-bnb",
+      "label": "BNB / USDT",
+      "chain": "bnb",
+      "kind": "crypto",
+      "feeBps": 5,
+      "pool": {
+        "type": "evm-call",
+        "address": "0xPASTE_METRIC_POOL_ADDRESS",
+        "abi": "function quote(address tokenIn, address tokenOut, uint256 amountIn) view returns (uint256 amountOut)",
+        "method": "quote",
+        "args": ["0xBNB_TOKEN_ADDRESS", "0xUSDT_TOKEN_ADDRESS", "1000000000000000000"],
+        "decimals": 18,
+        "divideBy": 1
+      },
+      "reference": {
+        "sources": [
+          { "type": "binance", "symbol": "BNBUSDT" }
+        ]
+      }
+    },
+    {
+      "id": "tsla-usd-robinhood",
+      "label": "TSLA / USD",
+      "chain": "robinhood",
+      "kind": "stock",
+      "marketHours": "us-equity",
+      "feeBps": 10,
+      "pool": {
+        "type": "evm-call",
+        "address": "0xPASTE_METRIC_POOL_ADDRESS",
+        "abi": "function getPrice() view returns (uint256)",
+        "method": "getPrice",
+        "decimals": 18
+      },
+      "reference": {
+        "sources": [
+          { "type": "finnhub", "symbol": "TSLA" },
+          { "type": "yahoo", "symbol": "TSLA" }
+        ]
+      }
+    }
+  ]
+}

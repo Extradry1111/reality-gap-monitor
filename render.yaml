@@ -1,0 +1,12 @@
+# Hosting on Render (render.com → New → Blueprint → this repo).
+# Starts in demo mode. To go live: add a Secret File named config.json,
+# set CONFIG=/etc/secrets/config.json, add your RPC/API keys as env vars, and remove DEMO.
+services:
+  - type: web
+    name: reality-gap-monitor
+    runtime: docker
+    plan: starter
+    healthCheckPath: /healthz
+    envVars:
+      - key: DEMO
+        value: "1"

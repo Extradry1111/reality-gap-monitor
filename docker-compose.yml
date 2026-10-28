@@ -1,0 +1,10 @@
+services:
+  monitor:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    env_file: .env
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - ./data:/app/data
